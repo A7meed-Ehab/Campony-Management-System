@@ -7,16 +7,15 @@ namespace Demo.PL.Controllers
 {
     public class DepartmentController : Controller
     {
-        private readonly IDepartmentRepository _employeeRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public DepartmentController(IDepartmentRepository departmentRepository)
+        public DepartmentController(IUnitOfWork unitOfWork)
         {
-            _employeeRepository = departmentRepository;
+            this._unitOfWork= unitOfWork;
         }
-
         public async Task<IActionResult> Index()
         {
-            var departments = await _employeeRepository.GetAllAsync();
+            var departments = await _unitOfWork.DepartmentRepository.GetAllAsync();
             return View(departments);
         }
 
@@ -32,7 +31,8 @@ namespace Demo.PL.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _employeeRepository.AddAsync(model);
+                await _unitOfWork.DepartmentRepository.AddAsync(model);
+                _unitOfWork.Complete();
                 return RedirectToAction(nameof(Index));
             }
             return View(model);
@@ -43,7 +43,7 @@ namespace Demo.PL.Controllers
             if (!id.HasValue)
                 return BadRequest("Department ID is required.");
 
-            var department = await _employeeRepository.GetByIdAsync(id.Value);
+            var department = await _unitOfWork.DepartmentRepository.GetByIdAsync(id.Value);
             if (department == null)
                 return NotFound();
 
@@ -53,7 +53,7 @@ namespace Demo.PL.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var department = await _employeeRepository.GetByIdAsync(id);
+            var department = await _unitOfWork.DepartmentRepository.GetByIdAsync(id);
             if (department == null)
                 return NotFound();
 
@@ -68,7 +68,8 @@ namespace Demo.PL.Controllers
             {
                 try
                 {
-                    await _employeeRepository.UpdateAsync(model);
+                    await _unitOfWork.DepartmentRepository.UpdateAsync(model);
+                    _unitOfWork.Complete();
                     return RedirectToAction(nameof(Index));
                 }
                 catch (System.Exception ex)
@@ -82,7 +83,7 @@ namespace Demo.PL.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
-            var department = await _employeeRepository.GetByIdAsync(id);
+            var department = await _unitOfWork.DepartmentRepository.GetByIdAsync(id);
             if (department == null)
                 return NotFound();
 
@@ -97,7 +98,8 @@ namespace Demo.PL.Controllers
                 return NotFound();
             try
             {
-                await _employeeRepository.DeleteAsync(department);
+                await _unitOfWork.DepartmentRepository.DeleteAsync(department);
+                _unitOfWork.Complete();
                 return RedirectToAction(nameof(Index));
             }
             catch (System.Exception ex)

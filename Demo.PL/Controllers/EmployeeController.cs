@@ -1,54 +1,61 @@
 ﻿using Demo.BLL.Interfaces;
+using AutoMapper;
 using Demo.BLL.Repositories;
 using Demo.DAL.Models;
 using Demo.PL.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Demo.PL.Helpers;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Demo.PL.Controllers
 {
     public class EmployeeController : Controller
     {
-        private readonly IEmployeeRepository _employeeRepository;
-        private readonly IDepartmentRepository _departmentRepository;
+        private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public EmployeeController(IEmployeeRepository employeeRepository,IDepartmentRepository departmentRepository)
+        public EmployeeController(IMapper mapper,IUnitOfWork unitOfWork)
         {
-            _employeeRepository = employeeRepository;
-            this._departmentRepository = departmentRepository;
+            this._mapper = mapper;
+            this._unitOfWork= unitOfWork;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchKey = "")
         {
-
-            var departments = await _employeeRepository.GetAllAsync(nameof(Department));
-            return View(departments);
+           var employees = await _unitOfWork.EmployeeRepository.GetAllAsync(e=>e.Name.ToLower().Contains(searchKey.ToLower()) ,nameof(Department));
+           return View(employees);
         }
 
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            //ViewBag.Departments = _departmentRepository.GetAllAsync();
             //var dept = new CreateEmployeeVM()
             //{
-            //    Departments = await _departmentRepository.GetAllAsync()
+            //    Departments = await _unitOfWork.EmployeeRepository.GetAllAsync()
             //};
 
-            ViewData["Departments"] =await  _departmentRepository.GetAllAsync();
+            ViewData["Departments"] =await  _unitOfWork.DepartmentRepository.GetAllAsync();
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Employee model)
+        public async Task<IActionResult> Create(CreateEmployeeViewModel Vmodel)
         {
-
             if (ModelState.IsValid)
             {
-                await _employeeRepository.AddAsync(model);
+                Vmodel.ImageName = DocumentSettings.UploadFile(Vmodel.Image, "images");
+                var MappedEmployee = _mapper.Map<Employee>(Vmodel);
+                MappedEmployee.Department =await _unitOfWork.DepartmentRepository.GetByIdAsync(Vmodel.DepartmentId);
+                await _unitOfWork.EmployeeRepository.AddAsync(MappedEmployee);
+                var complete=  _unitOfWork.Complete();
                 return RedirectToAction(nameof(Index));
             }
-            return View(model);
+            ViewData["Departments"] = await _unitOfWork.DepartmentRepository.GetAllAsync();
+            return View(Vmodel);
         }
 
         public async Task<IActionResult> Details(int? id, string viewName = "Details")
@@ -56,7 +63,7 @@ namespace Demo.PL.Controllers
             if (!id.HasValue)
                 return BadRequest("Employee ID is required.");
 
-            var department = await _employeeRepository.GetByIdAsync(id.Value);
+            var department = await _unitOfWork.EmployeeRepository.GetByIdAsync(id.Value);
             if (department == null)
                 return NotFound();
 
@@ -66,7 +73,7 @@ namespace Demo.PL.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var department = await _employeeRepository.GetByIdAsync(id);
+            var department = await _unitOfWork.EmployeeRepository.GetByIdAsync(id);
             if (department == null)
                 return NotFound();
                 return View(department);
@@ -80,7 +87,9 @@ namespace Demo.PL.Controllers
             {
                 try
                 {
-                    await _employeeRepository.UpdateAsync(model);
+                    await _unitOfWork.EmployeeRepository.UpdateAsync(model);
+                _unitOfWork.Complete();
+
                     return RedirectToAction(nameof(Index));
                 }
                 catch (System.Exception ex)
@@ -94,7 +103,7 @@ namespace Demo.PL.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
-            var Employee = await _employeeRepository.GetByIdAsync(id);
+            var Employee = await _unitOfWork.EmployeeRepository.GetByIdAsync(id);
             if (Employee == null)
                 return NotFound();
                 return View(Employee);
@@ -108,7 +117,9 @@ namespace Demo.PL.Controllers
                 return NotFound();
             try
             {
-                await _employeeRepository.DeleteAsync(model);
+                await _unitOfWork.EmployeeRepository.DeleteAsync(model);
+                _unitOfWork.Complete();
+
                 return RedirectToAction(nameof(Index));
             }
             catch (System.Exception ex)

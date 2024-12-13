@@ -14,8 +14,8 @@ namespace Demo.DAL.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Employee> builder)
         {
-            builder.Property(e => e.Salary)
-        .HasPrecision(18, 4);
+            builder.Property(e => e.Salary).HasPrecision(18, 4);
+            builder.Property(e => e.Name).IsRequired().HasMaxLength(50);
         }
     }
 }

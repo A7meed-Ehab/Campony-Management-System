@@ -11,16 +11,15 @@ namespace Demo.DAL.Models
     public class Employee :  BaseModel
     {
         public string Name { get; set; }
-        [RegularExpression("^01[0125][0 - 9]{8}$")]
         public string PhoneNumber { get; set; }
-        [EmailAddress]
         public string Email { get; set; }
         public string Address { get; set; }
-        public DateTime HireDate { get; set; }
-        [DataType(DataType.Currency)]
+        public string ImageName { get; set; }
+        public DateTime HireDate { get; set; }=DateTime.Now;
         public decimal Salary { get; set; }
-        public bool IsDeleted { get; set; }
+        public bool IsDeleted { get; set; } = false;
         public int? DepartmentId { get; set; }
+        //[ForeignKey("DepartmentId")]
         public Department Department { get; set; }
     }
 }

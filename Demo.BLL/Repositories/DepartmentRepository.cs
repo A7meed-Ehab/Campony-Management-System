@@ -12,10 +12,7 @@ namespace Demo.BLL.Repositories
 {
     public class DepartmentRepository : GenericRepository<Department>, IDepartmentRepository
     {
-        public DepartmentRepository(AppDbContext appDbContext) : base(appDbContext)
-        {
-            {
-            }
-        }
+        public DepartmentRepository(AppDbContext appDbContext) : base(appDbContext){}
     }
+    
 }

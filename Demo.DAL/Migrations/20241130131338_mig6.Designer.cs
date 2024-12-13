@@ -4,14 +4,16 @@ using Demo.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Demo.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241130131338_mig6")]
+    partial class mig6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,6 +109,32 @@ namespace Demo.DAL.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.ToTable("Employees");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 3,
+                            Address = "123 Main Street",
+                            DepartmentId = 1,
+                            Email = "alice.johnson@example.com",
+                            HireDate = new DateTime(2021, 3, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            Name = "Alice Johnson",
+                            PhoneNumber = "01012345678",
+                            Salary = 50000.00m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Address = "456 Elm Street",
+                            DepartmentId = 2,
+                            Email = "bob.smith@example.com",
+                            HireDate = new DateTime(2022, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            Name = "Bob Smith",
+                            PhoneNumber = "01198765432",
+                            Salary = 45000.00m
+                        });
                 });
 
             modelBuilder.Entity("Demo.DAL.Models.Employee", b =>
