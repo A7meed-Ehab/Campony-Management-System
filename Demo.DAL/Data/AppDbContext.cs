@@ -1,5 +1,6 @@
 ﻿using Demo.DAL.Data.Configurations;
 using Demo.DAL.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Demo.DAL.Data
 {
-    public class AppDbContext:DbContext 
+    public class AppDbContext:IdentityDbContext<AuthUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options):base(options)
         {
@@ -25,10 +26,7 @@ namespace Demo.DAL.Data
              new Department { Id = 2, Code = "Code2", Name = "Name2", DateOfCreation = new DateTime(2023, 12, 1) },
              new Department { Id = 3, Code = "Code3", Name = "Name3", DateOfCreation = new DateTime(2023, 12, 15) });
             }
-
-
         public DbSet<Department> Departments { get; set; }
         public DbSet<Employee> Employees { get; set; }
-
     }
 }

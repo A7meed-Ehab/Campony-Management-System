@@ -1,9 +1,11 @@
 using Demo.BLL.Interfaces;
 using Demo.BLL.Repositories;
 using Demo.DAL.Data;
+using Demo.DAL.Models;
 using Demo.PL.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,7 +34,10 @@ namespace Demo.PL
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
             services.AddAutoMapper(M=>M.AddProfile(new MappingProfiles()));
-
+            services.AddIdentity<AuthUser, IdentityRole>(Options =>
+            Options.Password.RequireNonAlphanumeric = true
+            ).AddEntityFrameworkStores<AppDbContext>();
+            services.AddAuthentication();
         }
 
                 // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
