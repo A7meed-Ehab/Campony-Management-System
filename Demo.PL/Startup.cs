@@ -3,6 +3,7 @@ using Demo.BLL.Repositories;
 using Demo.DAL.Data;
 using Demo.DAL.Models;
 using Demo.PL.Helpers;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -36,8 +37,14 @@ namespace Demo.PL
             services.AddAutoMapper(M=>M.AddProfile(new MappingProfiles()));
             services.AddIdentity<AuthUser, IdentityRole>(Options =>
             Options.Password.RequireNonAlphanumeric = true
-            ).AddEntityFrameworkStores<AppDbContext>();
-            services.AddAuthentication();
+            ).AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).
+                AddCookie(Options=>
+                {
+                    Options.LoginPath=("Account/Login");
+                    Options.AccessDeniedPath = ("Home/Error");
+                });
         }
 
                 // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -59,6 +66,7 @@ namespace Demo.PL
             app.UseRouting();
 
             // Enable authorization middleware
+            app.UseAuthentication();
             app.UseAuthorization();
 
             // Configure endpoints

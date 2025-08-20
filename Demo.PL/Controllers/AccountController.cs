@@ -10,11 +10,14 @@ namespace Demo.PL.Controllers
     public class AccountController : Controller
     {
         private readonly UserManager<AuthUser> _userManager;
+        private readonly SignInManager<AuthUser> _signInManager;
 
-        public AccountController(UserManager<AuthUser> userManager)
+        public AccountController(UserManager<AuthUser> userManager,SignInManager<AuthUser> signInManager)
         {
             this._userManager = userManager;
+            this._signInManager = signInManager;
         }
+        #region Register
         [HttpGet]
         public IActionResult Register()
         {
@@ -46,7 +49,42 @@ namespace Demo.PL.Controllers
                     }
                 }
             }
-                return View(model);
+            return View(model);
         }
+        #endregion
+        #region Login
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Email doesn't exist");
+                return View(model);
+            }
+
+            var loginResult = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
+
+            if (loginResult.Succeeded)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            return View(model);
+        }
+
+        #endregion
     }
 }

@@ -10,9 +10,12 @@ using System.Threading.Tasks;
 using Demo.PL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Demo.PL.Controllers
 {
+    [Authorize]
+
     public class EmployeeController : Controller
     {
         private readonly IMapper _mapper;
