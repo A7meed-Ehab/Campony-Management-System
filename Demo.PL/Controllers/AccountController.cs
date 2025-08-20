@@ -84,7 +84,13 @@ namespace Demo.PL.Controllers
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return View(model);
         }
-
+        #endregion
+        #region SignOut
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction(nameof(Login));
+        }
         #endregion
     }
 }
